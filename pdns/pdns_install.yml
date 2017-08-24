@@ -1,0 +1,20 @@
+# Ansible playbook to install & configure PowerDNS recursor on servers
+
+# Install & configure play
+
+- name: Install & Configure PowerDNS recursor
+  hosts: all_hosts
+  tasks:
+    - name: install powerdns recursor
+      apt:
+        name: pdns-recursor
+        state: present
+        update_cache: yes
+    - name: configure powerdns recursor
+      blockinfile:
+        path: /etc/powerdns/recursor.conf 
+        block: |
+          allow-from=10.0.3.0/24
+          local-address=0.0.0.0
+    - name: restart the pdns server
+      command: '/etc/init.d/pdns-recursor restart'

@@ -1,0 +1,18 @@
+# Playbook to purge PDNS recursor from package manager
+- name: remove PDNS package from servers
+  hosts: all_hosts
+  tasks:
+    - name: Purge pdns package
+      apt:
+        name: pdns-recursor
+        state: absent
+        purge: yes
+    - name: check pdns process pid
+      shell: ps aux | grep pdns | grep -v grep
+      register: out
+      ignore_errors: yes 
+    - name: Verify pdns killed off
+      assert: 
+        that:  
+           - "out.rc != 0"
+        msg: "process still exists. remove failed"

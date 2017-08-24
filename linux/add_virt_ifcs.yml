@@ -1,0 +1,50 @@
+- name: 'Configure 5 virtual ips on each linux box'
+  hosts: frankfurt  
+  become: true
+  tasks:
+    - name: 'create 5 more subinterfaces with virtual ips'
+      command: ifconfig ens3:{{item}} 45.74.47.{{item}}0 netmask 255.255.255.0
+      register: ifcadd
+      with_items:
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+    - name: 'configure rules for new virtual ips'
+      command: ip rule add from 45.74.47.{{item}}0 lookup src_table
+      register: ruleadd
+      with_items:
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+  tags:
+    - v-ips
+
+- name: 'Add secondary ips to AWS instance'
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ec2_access_key: ""
+    ec2_secret_key: ""
+  tasks:
+    - name: 'Attach 5 new ips on AWS'
+      ec2_eni:
+        aws_access_key: "{{ec2_access_key}}"
+        aws_secret_key: "{{ec2_secret_key}}"
+        region: eu-central-1
+        subnet_id: subnet-9eb6bad4
+        eni_id: eni-4d98a607
+        state: present
+        secondary_private_ip_addresses:
+          - 45.74.47.20
+          - 45.74.47.30
+          - 45.74.47.40
+          - 45.74.47.50
+          - 45.74.47.60
+  tags:
+    - aws
+

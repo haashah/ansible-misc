@@ -1,0 +1,31 @@
+# Ansible playbook to install & configure PowerDNS recursor on CENTOS servers
+
+# Install & configure play
+
+- name: Install & Configure PowerDNS recursor
+  hosts: hostvirtual
+  tasks:
+    - name: install epel
+      yum:
+        name: epel-release
+        state: present
+    - name: install yum priority plugin
+      yum:
+        name: yum-plugin-priorities
+        state: present
+    - name: update yum repos
+      command: curl -o /etc/yum.repos.d/powerdns-rec-40.repo https://repo.powerdns.com/repo-files/centos-rec-40.repo arg1
+      args:
+        creates: /etc/yum.repos.d/powerdns-rec-40.repo
+    - name: install powerdns recursor
+      yum:
+        name: pdns-recursor
+        state: latest
+        update_cache: yes
+    - name: configure powerdns recursor
+      blockinfile:
+        path: /etc/pdns-recursor/recursor.conf
+        block: |
+          edns-outgoing-bufsize=4096
+    - name: restart pdns-recursor
+      command: systemctl restart pdns-recursor

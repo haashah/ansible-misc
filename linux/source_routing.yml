@@ -1,0 +1,36 @@
+# This playbook configures source ip based routing on a linux box. Also known as policy based routing
+# We create a special route table and write a rule to use new routing table for traffic going out with
+# our target src ip. In new table we write our new default route. This is useful where we have more 
+# than one interface on a LAN but only one interface with internet access.
+
+- name: 'Configure source ip based routing on a Linux box'
+  hosts: frankfurt 
+  vars:
+    src_ip: '45.74.47.10'
+    gw_ip: '45.74.47.1'
+    ifc: 'ens3'
+  become: true
+  tasks:
+   - name: 'create new routing table'
+     lineinfile:
+       path: /etc/iproute2/rt_tables
+       line: 200 src_table
+     #become: true
+   - name: 'create policy routing rules'
+     command: ip rule add from {{src_ip}} lookup src_table
+     register: ruleadd 
+   - name: 'make rule persistent'
+     lineinfile:
+       path: /etc/network/interfaces
+       state: present
+       line: post-up ip rule add from {{src_ip}} lookup src_table 
+   - name: 'add default route in new table'
+     command: ip route add default via {{gw_ip}} dev {{ifc}} table src_table 
+     register: routeadd
+   - name: 'make route persistent'
+     lineinfile:
+       path: /etc/network/interfaces
+       line: post-up ip route add default via {{gw_ip}} dev {{ifc}} table src_table
+
+
+
