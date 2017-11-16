@@ -1,0 +1,26 @@
+# This playbook is to setup and install docker on CENTOS 7 machines
+
+- name: Install latest stable version of docker CE
+  hosts: staging_aws 
+  become: true
+  tasks:
+    - name: install required packages
+      yum:
+        name: yum-utils, device-mapper-persistent-data, lvm2, python-pip
+        state: present
+        update_cache: yes
+    - name: install pip packages
+      pip:
+        name: docker-py, Docker API
+        state: present
+    - name: setup repo
+      command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    - name: install docker
+      yum:
+        name: docker-ce
+        state: present
+        update_cache: yes
+    - name: start docker
+      command: systemctl start docker
+    - name: verify docker
+      command: docker run hello-world
