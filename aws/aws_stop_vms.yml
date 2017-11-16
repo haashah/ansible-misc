@@ -1,6 +1,0 @@
-# Playbook to stop AWS instances
-
-- name: Playbook to stop DNS servers
-  hosts: localhost
-  gather_facts: false
-  
