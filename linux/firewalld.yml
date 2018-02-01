@@ -1,0 +1,19 @@
+# Playbook to disable firewalld on CentOS 7. It messes up with functionality of docker
+
+- name: Playbook to disable firewalld
+  hosts: localhost 
+  tasks:
+    - name: stop firewalld on server
+      service:
+        name: firewalld
+        state: stopped
+    - name: disable firewalld permanently
+      service:
+        name: firewalld
+        enabled: no
+    - name: restart docker daemon
+      service:
+        name: docker
+        state: restarted
+
+

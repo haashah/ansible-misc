@@ -1,0 +1,14 @@
+# Ansible playbook to configure a cron job
+
+- name: Configure health monitor cron job
+  hosts: localhost
+  become: true
+  tasks:
+    - cron:
+        name: "configure pureDNS health monitor"
+        minute: "*/2"
+        day: "*"
+        month: "*"
+        job: "/opt/health_monitor/pdns_hm"
+        user: root
+        cron_file: pdns_hm

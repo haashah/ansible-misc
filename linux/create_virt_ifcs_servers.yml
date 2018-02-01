@@ -1,0 +1,13 @@
+- name: 'create virtual interfaces on hostvirtual servers'
+  hosts: hostvirtual2
+  become: true
+  tasks:
+    - name: 'create 5 more subinterfaces with virtual ips'
+      command: ifconfig eth0:{{item}} 45.74.47.{{item}}0 netmask 255.255.255.0
+      register: ifcadd
+      with_items:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
